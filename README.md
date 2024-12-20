@@ -1,10 +1,10 @@
 # ORCID2IRIS: Academic Importer
 
-A Python-based application to extract publication data from ORCID using their API and generate a CSV file formatted for import into IRIS academic systems.
+A React-based web application to extract publication data from ORCID using their API and generate a CSV file formatted for import into IRIS academic systems.
 
 ## Features
 
-- Command-line interface for entering ORCID ID and Access Token.
+- User-friendly React interface for entering ORCID ID and Access Token.
 - Fetches publications from ORCID, including title, DOI, journal, year, and more.
 - Generates a CSV file ready for import into IRIS.
 
@@ -12,7 +12,7 @@ A Python-based application to extract publication data from ORCID using their AP
 
 ### Prerequisites
 
-- Python 3.7 or higher installed on your system.
+- Node.js installed on your system.
 - An ORCID Access Token (available from [ORCID API Developer Tools](https://info.orcid.org/documentation/api-tutorials/)).
 
 ### Installation
@@ -25,34 +25,38 @@ A Python-based application to extract publication data from ORCID using their AP
 
 2. Install dependencies:
    ```bash
-   pip install -r requirements.txt
+   npm install
    ```
 
-3. Run the application:
+3. Start the development server:
    ```bash
-   python app.py
+   npm start
    ```
+
+The app will be available at `http://localhost:3000`.
 
 ## File Structure
 
 ```
 .
-├── orcid_to_iris
+├── public
+├── src
 │   ├── services
-│   │   └── orcid_service.py    # Handles API requests to ORCID
+│   │   └── orcidService.js    # Handles API requests to ORCID
 │   ├── utils
-│   │   └── csv_exporter.py     # Handles CSV generation
-│   ├── app.py                  # Main Python script
-│   └── __init__.py             # Package initializer
-├── requirements.txt            # Dependencies
+│   │   └── csvExporter.js     # Handles CSV generation
+│   ├── App.js                 # Main React component
+│   └── index.js               # Entry point
+├── package.json
 └── README.md
 ```
 
 ## Usage
 
-1. Run the script and provide your ORCID ID and Access Token when prompted.
-2. The script fetches publication data from ORCID and generates a CSV file.
-3. The generated CSV file can be imported directly into IRIS.
+1. Open the app in your browser.
+2. Enter your ORCID ID and Access Token into the provided input fields.
+3. Click "Generate CSV".
+4. The app will fetch publication data from ORCID and generate a CSV file for download.
 
 ## Example CSV Output
 
