@@ -1,16 +1,28 @@
 export function exportToCsv(data, filename) {
     const csvContent = [
-      ["Title", "Authors", "DOI", "Journal", "Year", "Volume", "Issue", "Pages", "Abstract"],
-      ...data.map((article) => [
-        article.title,
-        article.authors,
-        article.doi,
-        article.journal,
-        article.year,
-        article.volume,
-        article.issue,
-        article.pages,
-        article.abstract,
+      [
+        "Title",
+        "Authors",
+        "DOI",
+        "Journal",
+        "Year",
+        "Volume",
+        "Issue",
+        "Pages",
+        "Abstract",
+        "Publisher",
+      ],
+      ...data.map((item) => [
+        item.title,
+        item.authors,
+        item.doi,
+        item.journal,
+        item.year,
+        item.volume,
+        item.issue,
+        item.pages,
+        item.abstract,
+        item.publisher,
       ]),
     ]
       .map((row) => row.join(","))
@@ -26,4 +38,3 @@ export function exportToCsv(data, filename) {
     link.click();
     document.body.removeChild(link);
   }
-  
