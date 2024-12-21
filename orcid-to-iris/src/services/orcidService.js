@@ -1,38 +1,29 @@
-import { parseStringPromise } from "xml2js";
+const backendUrl = "orcid2iris-backend.railway.internal/api/orcid"; // Replace with your backend URL
 
-export async function fetchPublicationsWithToken(orcidId, token) {
-  if (!orcidId || !/^\d{4}-\d{4}-\d{4}-\d{4}$/.test(orcidId)) {
-    throw new Error("Invalid ORCID ID format. Please use the format ####-####-####-####.");
-  }
-
-  if (!token) {
-    throw new Error("Missing access token. Please provide a valid token.");
-  }
-
-  const url = `https://api.orcid.org/v3.0/${orcidId}/activities`;
-  const headers = {
-    Accept: "application/xml",
-    Authorization: `Bearer ${token}`,
-  };
-
+export async function fetchPublications(orcidId, token) {
   try {
-    const response = await fetch(url, { headers });
+    const response = await fetch(`${backendUrl}/${orcidId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch XML: ${response.status} - ${response.statusText}`);
+      throw new Error(`Failed to fetch publications: ${response.status} ${response.statusText}`);
     }
 
-    const xml = await response.text();
-    const result = await parseStringPromise(xml, { explicitArray: false });
-
+    const result = await response.json();
     const works = result?.["activities:activities-summary"]?.["activities:works"]?.["activities:group"];
+
     if (!works) {
+      console.warn("No works found for this ORCID ID.");
       return [];
     }
 
-    return (Array.isArray(works) ? works : [works]).flatMap(parseWorkGroup);
+    return works.flatMap((workGroup) => parseWorkGroup(workGroup));
   } catch (error) {
-    throw new Error(`Error fetching or parsing XML: ${error.message}`);
+    console.error("Error fetching publications:", error.message);
+    throw error;
   }
 }
 
@@ -41,34 +32,11 @@ function parseWorkGroup(workGroup) {
     ? workGroup["work:work-summary"]
     : [workGroup["work:work-summary"]];
 
-  return summaries.map((summary) => {
-    const externalIds = Array.isArray(summary?.["common:external-ids"]?.["common:external-id"])
-      ? summary["common:external-ids"]["common:external-id"]
-      : [summary?.["common:external-ids"]?.["common:external-id"]].filter(Boolean);
-
-    const doi = externalIds.find((id) => id["common:external-id-type"] === "doi")?.["common:external-id-value"] || "";
-
-    return {
-      title: summary?.["work:title"]?.["common:title"] || "No Title",
-      authors: extractContributors(summary),
-      doi,
-      journal: summary?.["work:journal-title"]?.["common:title"] || "No Journal",
-      year: summary?.["common:publication-date"]?.["common:year"] || "No Year",
-      volume: "No Volume",
-      issue: "No Issue",
-      pages: "No Pages",
-      abstract: summary?.["common:short-description"] || "No Abstract",
-      publisher: "No Publisher",
-    };
-  });
-}
-
-function extractContributors(summary) {
-  const contributors = summary?.["work:contributors"]?.["work:contributor"];
-  if (!contributors) return "No Authors";
-
-  const contributorArray = Array.isArray(contributors) ? contributors : [contributors];
-  return contributorArray
-    .map((contributor) => contributor?.["common:credit-name"] || contributor?.["work:contributor-name"] || "Unknown Author")
-    .join(", ");
+  return summaries.map((summary) => ({
+    title: summary?.["work:title"]?.["common:title"] || "No Title",
+    doi: summary?.["common:external-ids"]?.["common:external-id"]
+      ?.find((id) => id["common:external-id-type"] === "doi")?.["common:external-id-value"] || "",
+    journal: summary?.["work:journal-title"]?.["common:title"] || "No Journal",
+    year: summary?.["common:publication-date"]?.["common:year"] || "No Year",
+  }));
 }

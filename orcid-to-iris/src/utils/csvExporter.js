@@ -1,40 +1,14 @@
-export function exportToCsv(data, filename) {
-    const csvContent = [
-      [
-        "Title",
-        "Authors",
-        "DOI",
-        "Journal",
-        "Year",
-        "Volume",
-        "Issue",
-        "Pages",
-        "Abstract",
-        "Publisher",
-      ],
-      ...data.map((item) => [
-        item.title,
-        item.authors,
-        item.doi,
-        item.journal,
-        item.year,
-        item.volume,
-        item.issue,
-        item.pages,
-        item.abstract,
-        item.publisher,
-      ]),
-    ]
-      .map((row) => row.join(","))
-      .join("\n");
-  
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", filename);
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
+import { parse } from "json2csv";
+
+export function exportToCsv(data, filename = "publications.csv") {
+  const csvFields = ["title", "doi", "journal", "year"];
+  const csvData = parse(data, { fields: csvFields });
+
+  const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
